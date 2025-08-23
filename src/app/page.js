@@ -18,6 +18,7 @@ export default function Home() {
   }
   return (
     <>
+    <p></p>
      <div className={styles.nav}>
         <input type="text" 
         value={tableNum} 
