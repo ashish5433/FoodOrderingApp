@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono,Bebas_Neue } from "next/font/google";
+import { Geist, Geist_Mono,Macondo } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -11,10 +11,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const bebas=Bebas_Neue({
+const macondo = Macondo({
   subsets: ["latin"],
-  weight: "400",
-})
+  weight: "400", // Macondo only has regular 400
+});
 export const metadata = {
   title: "Food Ordering",
   description: "App Designed for food ordering at restraunt.",
@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-      <p className={bebas.className} style={{color:"white",fontSize:"32px",paddingLeft:"15px"}}>Boss's Cafe </p>
+      <p className={macondo.className} style={{color:"white",fontSize:"48px",paddingLeft:"15px",paddingTop:0}}>Boss's Cafe </p>
         {children}
       </body>
     </html>
