@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-      <p className={macondo.className} style={{color:"white",fontSize:"48px",paddingLeft:"15px",paddingTop:0}}>Boss's Cafe </p>
+      <p className={macondo.className} style={{color:"white",fontSize:"48px",paddingLeft:"15px",paddingTop:0}}>{"Boss's Cafe"} </p>
         {children}
       </body>
     </html>

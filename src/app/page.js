@@ -3,6 +3,7 @@ import styles from './styles/home.module.css'
 import { use, useState } from 'react';
 import { Macondo } from 'next/font/google'
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ToastContainer, toast,Bounce} from 'react-toastify';
 const macondo = Macondo({
   subsets: ["latin"],
@@ -28,7 +29,7 @@ export default function Home() {
       return;
     }
 
-    router.push(`/tabledata.js/${tableNum}`)
+    router.push(`/table/${tableNum}`)
   }
   return (
     <>
@@ -59,6 +60,7 @@ export default function Home() {
 
         <button className={`${styles.button} ${macondo.className}`} onClick={goToTablePage}>New Order</button>
         <button className={`${styles.button} ${macondo.className}`}>View Orders</button>
+        <Link href="./menu" className={styles.menu_link}>Menu</Link>
       </div>
     </>
   );
