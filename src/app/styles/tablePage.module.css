@@ -161,7 +161,11 @@
 }
 
 /* Orders view */
-.orderWrap { max-width: 640px; margin: 0 auto; }
+.orderWrap { 
+    width: 90%;
+    max-width: 640px; 
+    margin: 0 auto; 
+}
 .sumList { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .sumRow {
   display: flex; justify-content: space-between; align-items: center;

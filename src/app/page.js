@@ -47,8 +47,9 @@ export default function Home() {
         transition={Bounce}
       />
       <div className={styles.nav}>
-        <input type="text"
+        <input type="number"
           value={tableNum}
+          
           className={styles.input}
           placeholder='Enter Table Number...'
           onChange={(e) => {
