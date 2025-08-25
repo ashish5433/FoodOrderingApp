@@ -53,7 +53,7 @@ export default function Home() {
           placeholder='Enter Table Number...'
           onChange={(e) => {
             setTableNum(e.target.value)
-            setshowError(false)
+           
 
           }}
         />
