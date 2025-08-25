@@ -1,6 +1,9 @@
-import { Geist, Geist_Mono,Macondo } from "next/font/google";
+import Link from "next/link";
+import { Geist, Geist_Mono, Macondo } from "next/font/google";
 import "./globals.css";
+import { TiHome } from "react-icons/ti";
 
+import { use } from "react";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -21,13 +24,20 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-      <p className={macondo.className} style={{color:"white",fontSize:"48px",paddingLeft:"15px",paddingTop:0}}>{"Boss's Cafe"} </p>
+        
+        <div className="nav">
+          <p className={macondo.className} style={{ color: "white", fontSize: "48px" }}>{"Boss's Cafe"} </p>
+          <Link href='/'><TiHome className="home-logo" /></Link>
+        </div>
+        <main>
         {children}
+        </main>
       </body>
     </html>
   );

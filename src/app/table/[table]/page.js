@@ -17,7 +17,7 @@ export default function ProfilePage({ params }) {
       return copy;
     });
 
-  // Build cart from qty
+  
   const cart = useMemo(() => {
     const items = [];
     for (const [category, list] of Object.entries(menuData)) {
@@ -51,7 +51,7 @@ export default function ProfilePage({ params }) {
             title={cart.length === 0 ? "No items yet" : "View current order"}
           >
             Orders
-            {/* {cart.length > 0 && <span className={styles.badge}>{cart.length}</span>} */}
+            
           </button>
         </div>
       </header>
