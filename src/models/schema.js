@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import { Schema } from "mongoose";
+import mongoose  from "mongoose";
 
 const orderItemSchema=new Schema({
     category:{
@@ -41,4 +42,4 @@ const orderSchema=new Schema({
 
 orderSchema.index({status:1,createdAt:-1});
 
-export default mongoose.model.Order || mongoose.model("Order",orderSchema);
+export default mongoose.models.Order || mongoose.model("Order",orderSchema);

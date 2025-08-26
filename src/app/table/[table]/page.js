@@ -1,13 +1,13 @@
 "use client";
-import {use, useMemo, useState } from "react";
+import { use, useMemo, useState } from "react";
 import menuData from "@/Data/menu.json";
 import styles from "../../styles/tablePage.module.css";
-
+import axios from "axios";
 export default function ProfilePage({ params }) {
-  const { table } = use(params);                         
+  const { table } = use(params);
   const [qty, setqty] = useState({});
-  const [showOrder, setShowOrder] = useState(false); 
-
+  const [showOrder, setShowOrder] = useState(false);
+  const [saving, setSaving] = useState(false)
   const inc = (k) => setqty((prev) => ({ ...prev, [k]: (prev[k] || 0) + 1 }));
   const dec = (k) =>
     setqty((prev) => {
@@ -17,12 +17,12 @@ export default function ProfilePage({ params }) {
       return copy;
     });
 
-  
+
   const cart = useMemo(() => {
     const items = [];
     for (const [category, list] of Object.entries(menuData)) {
       for (const it of list) {
-        const key = `${category}::${it.name}`;     
+        const key = `${category}::${it.name}`;
         const count = qty[key] || 0;
         if (count > 0) items.push({ key, category, ...it, qty: count });
       }
@@ -31,10 +31,31 @@ export default function ProfilePage({ params }) {
   }, [qty]);
 
   const total = cart.reduce((s, it) => s + it.price * it.qty, 0);
+  async function placeOrder() {
+    if (cart.length === 0 || saving) return
 
+    try {
+      setSaving(true)
+      const payload = {
+        table_num: table,
+        items: cart.map(({ category, name, price, qty }) => ({ category, name, price, qty })),
+        total: total
+      }
+
+      const res = await axios.post('/api/orders', payload)
+      console.log(res.status)
+      alert("Order Placed");
+      // setqty({})
+    } catch (err) {
+      console.log("Error in order placing", err);
+      // alert("Order Not placed")
+    } finally {
+      setSaving(false)
+    }
+  }
   return (
     <div className={styles.page}>
-      
+
       <header className={styles.topbar}>
         <h1 className={styles.heading}>Table : {table}</h1>
         <div className={styles.toggleGroup}>
@@ -51,7 +72,7 @@ export default function ProfilePage({ params }) {
             title={cart.length === 0 ? "No items yet" : "View current order"}
           >
             Orders
-            
+
           </button>
         </div>
       </header>
@@ -129,7 +150,7 @@ export default function ProfilePage({ params }) {
                 <button className={styles.clearBtn} onClick={() => setqty({})}>
                   Clear
                 </button>
-                <button className={styles.primaryBtn} onClick={() => alert("Place Order (hook backend later)")}>
+                <button className={styles.primaryBtn} onClick={placeOrder}>
                   Place Order
                 </button>
               </div>
