@@ -1,5 +1,6 @@
 "use client"
 import styles from './styles/home.module.css'
+
 import { use, useState } from 'react';
 import { Macondo } from 'next/font/google'
 import { useRouter } from 'next/navigation';
@@ -13,8 +14,11 @@ const macondo = Macondo({
 export default function Home() {
   const [tableNum, setTableNum] = useState("")
   const [showPopUp, setshowPopUp] = useState(false);
+  const [loading,setLoading]=useState(false)
   const router = useRouter();
   const goToTablePage = async () => {
+    try{
+      setLoading(true)
     if (!tableNum.trim()) {
       toast.error('Invalid Table Number', {
         position: "top-center",
@@ -31,12 +35,18 @@ export default function Home() {
     }
     const res = await axios.get(`/api/orders/${tableNum}`)
     const data = res.data
-    if (data.message !== null) {
+    if (data?.message !== null) {
       // alert("Order Already Exists")
       setshowPopUp(true)
       return;
     }
     router.push(`/table/${tableNum}`)
+  }catch(err){
+    alert("Error in Opening Table")
+    console.log(err)
+  }finally{
+    setLoading(false)
+  }
   }
   const closepopUp=()=>{
     setTableNum("")
@@ -57,6 +67,11 @@ export default function Home() {
         theme="dark"
         transition={Bounce}
       />
+       {loading && (
+        <div className={styles.loaderOverlay}>
+          <div className={styles.spinner}></div>
+        </div>
+      )}
       <div className={styles.nav}>
         <input type="number"
           value={tableNum}
