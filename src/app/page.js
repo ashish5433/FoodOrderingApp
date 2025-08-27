@@ -5,18 +5,18 @@ import { Macondo } from 'next/font/google'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import { ToastContainer, toast,Bounce} from 'react-toastify';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
 const macondo = Macondo({
   subsets: ["latin"],
   weight: "400",
 });
 export default function Home() {
   const [tableNum, setTableNum] = useState("")
-  const [showPopUp,setshowPopUp]=useState(false);
+  const [showPopUp, setshowPopUp] = useState(false);
   const router = useRouter();
-  const goToTablePage =async () => {
+  const goToTablePage = async () => {
     if (!tableNum.trim()) {
-      toast.error('Invalid Table Number',{
+      toast.error('Invalid Table Number', {
         position: "top-center",
         autoClose: 3000,
         hideProgressBar: false,
@@ -29,14 +29,18 @@ export default function Home() {
       });
       return;
     }
-    const res=await axios.get(`/api/orders/${tableNum}`)
-    const data=res.data
-    if(data.message!==null){
-      alert("Order Already Exists")
+    const res = await axios.get(`/api/orders/${tableNum}`)
+    const data = res.data
+    if (data.message !== null) {
+      // alert("Order Already Exists")
       setshowPopUp(true)
       return;
     }
     router.push(`/table/${tableNum}`)
+  }
+  const closepopUp=()=>{
+    setTableNum("")
+    setshowPopUp(false)
   }
   return (
     <>
@@ -56,12 +60,12 @@ export default function Home() {
       <div className={styles.nav}>
         <input type="number"
           value={tableNum}
-          
+
           className={styles.input}
           placeholder='Enter Table Number...'
           onChange={(e) => {
             setTableNum(e.target.value)
-           
+
 
           }}
         />
@@ -71,14 +75,21 @@ export default function Home() {
         <Link href="./menu" className={styles.menu_link}>Menu</Link>
       </div>
 
-      {showPopUp && <div className={styles.pop_up_div}> 
-          <p>Order Already Exists for {tableNum}</p>
-          <div className={styles.pop_upButtondiv}>
-          <button className={styles.popUpbutton}>Update Order</button>
-          <button className={styles.popUpbutton}>Cancel Order</button>
-          <button className={styles.popUpbutton}>Go Back</button>
+      {showPopUp && (
+        <div
+          className={styles.overlay}
+          onClick={closepopUp}   
+        >
+          <div className={styles.pop_up_div}>
+            <p>Order Already Exists for {tableNum}</p>
+            <div className={styles.pop_upButtondiv}>
+              <button className={styles.popUpbutton}>Update Order</button>
+              <button className={styles.popUpbutton}>Cancel Order</button>
+              <button className={styles.popUpbutton} onClick={closepopUp}>Go Back</button>
+            </div>
           </div>
-      </div>
+        </div>
+      )
       }
     </>
   );
