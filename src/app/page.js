@@ -12,7 +12,7 @@ const macondo = Macondo({
 });
 export default function Home() {
   const [tableNum, setTableNum] = useState("")
-
+  const [showPopUp,setshowPopUp]=useState(false);
   const router = useRouter();
   const goToTablePage =async () => {
     if (!tableNum.trim()) {
@@ -33,6 +33,7 @@ export default function Home() {
     const data=res.data
     if(data.message!==null){
       alert("Order Already Exists")
+      setshowPopUp(true)
       return;
     }
     router.push(`/table/${tableNum}`)
@@ -69,6 +70,16 @@ export default function Home() {
         <button className={`${styles.button} ${macondo.className}`}>View Orders</button>
         <Link href="./menu" className={styles.menu_link}>Menu</Link>
       </div>
+
+      {showPopUp && <div className={styles.pop_up_div}> 
+          <p>Order Already Exists for {tableNum}</p>
+          <div className={styles.pop_upButtondiv}>
+          <button className={styles.popUpbutton}>Update Order</button>
+          <button className={styles.popUpbutton}>Cancel Order</button>
+          <button className={styles.popUpbutton}>Go Back</button>
+          </div>
+      </div>
+      }
     </>
   );
 }
