@@ -48,7 +48,7 @@ export default function ProfilePage({ params }) {
       // setqty({})
     } catch (err) {
       console.log("Error in order placing", err);
-      // alert("Order Not placed")
+      alert("Order Not placed")
     } finally {
       setSaving(false)
     }
@@ -151,7 +151,7 @@ export default function ProfilePage({ params }) {
                   Clear
                 </button>
                 <button className={styles.primaryBtn} onClick={placeOrder}>
-                  Place Order
+                 {saving===true?"Saving..." : "Place Order"}
                 </button>
               </div>
             </>

@@ -4,6 +4,7 @@ import { use, useState } from 'react';
 import { Macondo } from 'next/font/google'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import axios from 'axios';
 import { ToastContainer, toast,Bounce} from 'react-toastify';
 const macondo = Macondo({
   subsets: ["latin"],
@@ -13,7 +14,7 @@ export default function Home() {
   const [tableNum, setTableNum] = useState("")
 
   const router = useRouter();
-  const goToTablePage = () => {
+  const goToTablePage =async () => {
     if (!tableNum.trim()) {
       toast.error('Invalid Table Number',{
         position: "top-center",
@@ -28,7 +29,12 @@ export default function Home() {
       });
       return;
     }
-
+    const res=await axios.get(`/api/orders/${tableNum}`)
+    const data=res.data
+    if(data.message!==null){
+      alert("Order Already Exists")
+      return;
+    }
     router.push(`/table/${tableNum}`)
   }
   return (
