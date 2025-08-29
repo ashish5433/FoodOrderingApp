@@ -44,10 +44,18 @@ export default function ProfilePage({ params }) {
 
       const res = await axios.post('/api/orders', payload)
       console.log(res.status)
-      alert("Order Placed");
+      if(res.status===201){
+      alert("Hurrayyy Order Placed");
+      }else{
+        alert(res.status)
+      }
       // setqty({})
     } catch (err) {
       console.log("Error in order placing", err);
+      if(err.status===409){
+        alert("Order Already Exists...", err.status);
+        return;
+      }
       alert("Order Not placed")
     } finally {
       setSaving(false)
