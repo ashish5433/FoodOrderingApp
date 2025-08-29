@@ -48,6 +48,21 @@ export default function Home() {
     setLoading(false)
   }
   }
+  const deleteOrder=async()=>{
+    try{
+      setLoading(true);
+      const res=axios.delete(`/api/orders/${tableNum}`)
+      const data=(await res).data
+      console.log(data)
+    }catch(err){
+      alert("Error Occured in deleting")
+      console.log(err)
+      setLoading(false)
+    }finally{
+      setLoading(false)
+    }
+
+  }
   const closepopUp=()=>{
     setTableNum("")
     setshowPopUp(false)
@@ -99,7 +114,7 @@ export default function Home() {
             <p>Order Already Exists for {tableNum}</p>
             <div className={styles.pop_upButtondiv}>
               <button className={styles.popUpbutton}>Update Order</button>
-              <button className={styles.popUpbutton}>Cancel Order</button>
+              <button className={styles.popUpbutton} onClick={deleteOrder}>Cancel Order</button>
               <button className={styles.popUpbutton} onClick={closepopUp}>Go Back</button>
             </div>
           </div>
