@@ -1,4 +1,4 @@
-// app/api/orders/route.js
+
 import dbConnect from '@/lib/dbConnnect.js';
 import Order from '@/models/schema.js';
 
@@ -37,12 +37,12 @@ export async function POST(req) {
     );
    
     return Response.json(
-      { message: "Order created", order: raw?.value },
+      { message: "Order created"},
       { status: 201 }
     );
 
   } catch (err) {
-    // Duplicate key safety (in case index just got created and two upserts raced)
+    
     if (err?.code === 11000) {
       return Response.json(
         { error: "Order already exists for this table" },
