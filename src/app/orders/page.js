@@ -1,24 +1,25 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from '@/app/styles/order.module.css'
 import axios from 'axios'
 
 const Page = () => {
     const [orders, setOrders] = useState([])
-    const [expanded, setExpanded] = useState({}) // track which order is expanded
-    const [checkedItems, setCheckedItems] = useState({}) // track checked items per order
+    const [expanded, setExpanded] = useState({}) 
+    const [checkedItems, setCheckedItems] = useState({}) 
+    useEffect(()=>{
 
-    const viewOrders = async () => {
-        const res = await axios.get('/api/orders')
-        setOrders(res.data)
-
-        // initialize checked state for each order
-        const initialChecked = {}
-        res.data.forEach(order => {
-            initialChecked[order._id] = new Array(order.item.length).fill(false)
-        })
-        setCheckedItems(initialChecked)
-    }
+        const viewOrders = async () => {
+            const res = await axios.get('/api/orders')
+            setOrders(res.data)
+            const initialChecked = {}
+            res.data.forEach(order => {
+                initialChecked[order._id] = new Array(order.item.length).fill(false)
+            })
+            setCheckedItems(initialChecked)
+        }
+        viewOrders()
+    },[])
 
     const toggleExpand = (id) => {
         setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
@@ -39,9 +40,7 @@ const Page = () => {
 
     return (
         <>
-            <button onClick={viewOrders} style={{ marginTop: "20px" }}>
-                View Orders
-            </button>
+           
 
             <div className={styles.container}>
                 {orders.map((order) => {
