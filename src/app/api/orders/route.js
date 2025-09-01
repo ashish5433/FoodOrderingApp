@@ -13,7 +13,7 @@ export async function POST(req) {
       return Response.json({ error: "Invalid Payload" }, { status: 400 });
     }
 
-    const tableNo = Number(table_num);
+    const tableNo = (table_num);
     const exists=await Order.find({table_no:tableNo})
     console.log(exists)
     if(exists.length>0){
