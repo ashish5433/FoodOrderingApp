@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
 import { ToastContainer, toast, Bounce } from 'react-toastify';
+import { Router } from 'next/router';
 const macondo = Macondo({
   subsets: ["latin"],
   weight: "400",
@@ -101,7 +102,7 @@ export default function Home() {
         />
 
         <button className={`${styles.button} ${macondo.className}`} onClick={goToTablePage}>New Order</button>
-        <button className={`${styles.button} ${macondo.className}`}>View Orders</button>
+        <button onClick={()=>{router.push(`/orders`)}}className={`${styles.button} ${macondo.className}`}>View Orders</button>
         <Link href="./menu" className={styles.menu_link}>Menu</Link>
       </div>
 
