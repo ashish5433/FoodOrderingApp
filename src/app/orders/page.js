@@ -1,120 +1,106 @@
-'use client'
-import React, { useEffect, useState } from 'react'
-import styles from '@/app/styles/order.module.css'
-import axios from 'axios'
-import { redis } from '@/lib/redis'
+"use client"
+import React, { useEffect, useState } from "react"
+import styles from "@/app/styles/order.module.css"
+import axios from "axios"
+import { db } from "@/lib/firebase"
+import { doc, onSnapshot, setDoc } from "firebase/firestore"
 
 const Page = () => {
-    const [orders, setOrders] = useState([])
-    const [expanded, setExpanded] = useState({})
-    const [checkedItems, setCheckedItems] = useState({})
-    useEffect(() => {
-        const event = new EventSource('/api/orders/stream')
-        event.onmessage=(event) => {
-            const data = JSON.parse(event.data)
+  const [orders, setOrders] = useState([])
+  const [expanded, setExpanded] = useState({})
 
-            setOrders(prev => prev.map(order => order._id === data.id ? {
-                ...order,
-                item: order.item.map((it, idx) => (
-                    idx === data.index ? { ...it, checked: data.checked } : it
-                ))
-            } : order))
-        }
-        return () => event.close()
-    }, [])
+  
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const res = await axios.get("/api/orders")
+      setOrders(res.data)
 
-    const toggleExpand = (id) => {
-        setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
-    }
-
-    useEffect(() => {
-
-        const fetchOrders = async () => {
-            const res = await axios.get("/api/orders")
-            const orders = res.data
-            setOrders(orders)
-
-            
-            const initialChecked = {}
-            orders.forEach(order => {
-                initialChecked[order._id] = order.item.map(it => it.checked || false)
-            })
-            setCheckedItems(initialChecked)
-        }
-
-        fetchOrders()
-    }, [])
-
-    const handleCheck = (orderId, idx) => {
-        const newChecked = !checkedItems[orderId]?.[idx]
-        setCheckedItems(prev => {
-            const updated = [...prev[orderId]]
-            updated[idx] = !updated[idx]
-            return { ...prev, [orderId]: updated }
+      res.data.forEach((order) => {
+        const ref = doc(db, "checkboxes", order._id)
+        onSnapshot(ref, (snap) => {
+          if (snap.exists()) {
+            const data = snap.data()
+            setOrders((prev) =>
+              prev.map((item) =>
+                item._id === order._id
+                  ? {
+                      ...item,
+                      item: item.item.map((it, idx) => ({
+                        ...it,
+                        checked: data.checks[idx] ?? false, // ✅ default to false
+                      })),
+                    }
+                  : item
+              )
+            )
+          }
         })
-
-        axios.put(`/api/orders/redisUpdate/${orderId}/check`, {
-            index: idx,
-            checked: newChecked
-        })
+      })
     }
 
-    const completeOrder = async () => {
-        alert(`Order completed! ✅`)
+    fetchOrders()
+  }, [])
 
-    }
+  // 🔹 Expand/collapse card
+  const toggleExpand = (id) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
 
-    return (
-        <>
+  // 🔹 Handle checkbox toggle
+  const handleCheck = async (orderId, idx) => {
+    const order = orders.find((item) => item._id === orderId)
 
-
-            <div className={styles.container}>
-                {orders.map((order) => {
-                    const allChecked =
-                        checkedItems[order._id]?.every(Boolean) || false
-
-                    return (
-                        <div key={order._id} className={styles.card}>
-                            <div
-                                className={styles.cardHeader}
-                                onClick={() => toggleExpand(order._id)}
-                            >
-                                <h3>Table {order.table_no}</h3>
-                                <p>Status: {order.status}</p>
-                                <p>Total: ₹{order.total}</p>
-                            </div>
-
-                            {expanded[order._id] && (
-                                <div className={styles.cardBody}>
-                                    <ul>
-                                        {order.item.map((it, idx) => (
-                                            <li key={idx}>
-                                                <label>
-                                                    <input
-                                                        type="checkbox"
-                                                        className={styles.customCheckbox}
-                                                        checked={checkedItems[order._id]?.[idx] || false}
-                                                        onChange={() => handleCheck(order._id, idx)}
-                                                    />
-                                                    {it.name} — ₹{it.price} × {it.qty}
-                                                </label>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <button
-                                        disabled={!allChecked}
-                                        onClick={() => completeOrder()}
-                                    >
-                                        Complete Order
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )
-                })}
-            </div>
-        </>
+    // Ensure no undefined values
+    const updatedChecks = order.item.map((it, i) =>
+      i === idx ? !(it.checked ?? false) : (it.checked ?? false)
     )
+
+    await setDoc(doc(db, "checkboxes", orderId), {
+      checks: updatedChecks,
+    })
+  }
+
+  return (
+    <div className={styles.container}>
+      {orders.map((order) => {
+        const allChecked = order.item.every((it) => it.checked ?? false)
+
+        return (
+          <div key={order._id} className={styles.card}>
+            <div
+              className={styles.cardHeader}
+              onClick={() => toggleExpand(order._id)}
+            >
+              <h3>Table {order.table_no}</h3>
+              <p>Status: {order.status}</p>
+              <p>Total: ₹{order.total}</p>
+            </div>
+
+            {expanded[order._id] && (
+              <div className={styles.cardBody}>
+                <ul>
+                  {order.item.map((it, idx) => (
+                    <li key={idx}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          className={styles.customCheckbox}
+                          checked={it.checked ?? false}
+                          onChange={() => handleCheck(order._id, idx)}
+                        />
+                        {it.name} — ₹{it.price} × {it.qty}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+                <button disabled={!allChecked}>Complete Order</button>
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 export default Page

@@ -1,7 +1,7 @@
 
 import dbConnect from '@/lib/dbConnnect.js';
 import Order from '@/models/schema.js';
-import { redis } from '@/lib/redis';
+
 export const runtime = "nodejs";
 
 export async function POST(req) {
@@ -59,31 +59,9 @@ export async function GET() {
     await dbConnect()
     const orders = await Order.find().sort({ createdAt: -1 })
 
-    const withChecks = await Promise.all(
-      orders.map(async (order) => {
-        const key = `order:${order._id}:checks`
-        let current = await redis.get(key)
+   
 
-        try {
-          current = current ? JSON.parse(current) : []
-          if (!Array.isArray(current)) current = []
-        } catch {
-          current = []
-        }
-
-        const items = order.item.map((it, idx) => ({
-          ...it.toObject?.() || it,
-          checked: current[idx] || false,
-        }))
-
-        return {
-          ...order.toObject(),
-          item: items,
-        }
-      })
-    )
-
-    return Response.json(withChecks)
+    return Response.json(orders)
   } catch (err) {
     console.error(err)
     return Response.json({ error: "Server error" }, { status: 500 })
