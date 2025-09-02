@@ -2,45 +2,71 @@
 import React, { useEffect, useState } from 'react'
 import styles from '@/app/styles/order.module.css'
 import axios from 'axios'
+import { redis } from '@/lib/redis'
 
 const Page = () => {
     const [orders, setOrders] = useState([])
-    const [expanded, setExpanded] = useState({}) 
-    const [checkedItems, setCheckedItems] = useState({}) 
-    useEffect(()=>{
+    const [expanded, setExpanded] = useState({})
+    const [checkedItems, setCheckedItems] = useState({})
+    useEffect(() => {
+        const event = new EventSource('/api/orders/stream')
+        event.onmessage=(event) => {
+            const data = JSON.parse(event.data)
 
-        const viewOrders = async () => {
-            const res = await axios.get('/api/orders')
-            setOrders(res.data)
-            const initialChecked = {}
-            res.data.forEach(order => {
-                initialChecked[order._id] = new Array(order.item.length).fill(false)
-            })
-            setCheckedItems(initialChecked)
+            setOrders(prev => prev.map(order => order._id === data.id ? {
+                ...order,
+                item: order.item.map((it, idx) => (
+                    idx === data.index ? { ...it, checked: data.checked } : it
+                ))
+            } : order))
         }
-        viewOrders()
-    },[])
+        return () => event.close()
+    }, [])
 
     const toggleExpand = (id) => {
         setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
     }
 
+    useEffect(() => {
+
+        const fetchOrders = async () => {
+            const res = await axios.get("/api/orders")
+            const orders = res.data
+            setOrders(orders)
+
+            
+            const initialChecked = {}
+            orders.forEach(order => {
+                initialChecked[order._id] = order.item.map(it => it.checked || false)
+            })
+            setCheckedItems(initialChecked)
+        }
+
+        fetchOrders()
+    }, [])
+
     const handleCheck = (orderId, idx) => {
+        const newChecked = !checkedItems[orderId]?.[idx]
         setCheckedItems(prev => {
             const updated = [...prev[orderId]]
             updated[idx] = !updated[idx]
             return { ...prev, [orderId]: updated }
         })
+
+        axios.put(`/api/orders/redisUpdate/${orderId}/check`, {
+            index: idx,
+            checked: newChecked
+        })
     }
 
     const completeOrder = async () => {
         alert(`Order completed! ✅`)
-        
+
     }
 
     return (
         <>
-           
+
 
             <div className={styles.container}>
                 {orders.map((order) => {
