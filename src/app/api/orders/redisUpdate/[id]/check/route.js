@@ -16,7 +16,7 @@ export async function PUT(req, { params }) {
     } else {
         current = []
     }
-    console.log(typeof current)
+    // console.log(typeof current)
     current[index]=checked
 
     await redis.set(key, JSON.stringify(current))

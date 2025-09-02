@@ -56,29 +56,36 @@ export async function POST(req) {
 
 export async function GET() {
   try {
-    await dbConnect();
-    const orders = await Order.find().sort({ createdAt: -1 });
-      const withChecks = await Promise.all(
+    await dbConnect()
+    const orders = await Order.find().sort({ createdAt: -1 })
+
+    const withChecks = await Promise.all(
       orders.map(async (order) => {
-      const key = `order:${order._id}:checks`
-      const checks = await redis.get(key)
-      const parsed = checks ? JSON.parse(checks) : []
+        const key = `order:${order._id}:checks`
+        let current = await redis.get(key)
 
-      const items = order.item.map((it, idx) => ({
-        ...it.toObject?.() || it,
-        checked: parsed[idx] || false,
-      }))
+        try {
+          current = current ? JSON.parse(current) : []
+          if (!Array.isArray(current)) current = []
+        } catch {
+          current = []
+        }
 
-      return {
-        ...order.toObject(),
-        item: items,
-      }
-    })
-  )
+        const items = order.item.map((it, idx) => ({
+          ...it.toObject?.() || it,
+          checked: current[idx] || false,
+        }))
 
-  return Response.json(withChecks) 
+        return {
+          ...order.toObject(),
+          item: items,
+        }
+      })
+    )
+
+    return Response.json(withChecks)
   } catch (err) {
-    console.error(err);
-    return Response.json({ error: "Server error" }, { status: 500 });
+    console.error(err)
+    return Response.json({ error: "Server error" }, { status: 500 })
   }
 }
