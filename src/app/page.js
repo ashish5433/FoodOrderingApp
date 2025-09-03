@@ -1,6 +1,7 @@
 "use client"
 import styles from './styles/home.module.css'
 
+
 import { use, useState } from 'react';
 import { Macondo } from 'next/font/google'
 import { useRouter } from 'next/navigation';
@@ -109,7 +110,7 @@ export default function Home() {
           />
 
         <button className={`${styles.button} ${macondo.className}`} onClick={goToTablePage}>New Order</button>
-        <button className={`${styles.button} ${macondo.className}`}>View Orders</button>
+        <button onClick={()=>{router.push(`/orders`)}}className={`${styles.button} ${macondo.className}`}>View Orders</button>
         <Link href="./menu" className={styles.menu_link}>Menu</Link>
       </div>
 
