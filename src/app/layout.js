@@ -29,10 +29,12 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        
-        <video autoPlay loop muted playsInline className="bg-video fixed">
-          <source src="/bgFogVideo.mp4" type="video/mp4" />
-        </video>
+
+        <div className="video-container">
+          <video autoPlay loop muted playsInline className="bg-video">
+            <source src="/bgFogVideo.mp4" type="video/mp4" />
+          </video>
+        </div>
 
         <div className="nav">
           <p
@@ -45,7 +47,7 @@ export default function RootLayout({ children }) {
             <TiHome className="home-logo" />
           </Link>
         </div>
-        <main>{children}</main>
+        <main className="main-content">{children}</main>
       </body>
     </html>
   );
