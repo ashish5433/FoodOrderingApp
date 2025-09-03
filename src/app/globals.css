@@ -1,31 +1,40 @@
-html,body{
+html, body {
   background-color: black;
   margin: 0;
   padding: 0;
-  overflow-x: clip;
+  overflow-x: hidden;
   
+}
+
+
+.bg-video.fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  filter: blur(10px);   
+  /* z-index: -1; */
+  pointer-events: none;
 }
 
 .nav {
   display: flex;
   position: sticky;
   top: 16px;
-  z-index:1000;
+  z-index: 1000;
   justify-content: space-between;
   align-items: center;
-  
   height: 64px;
-  background-color: #111111a0;    
+  background-color: transparent;
+   backdrop-filter: blur(20px);
   padding: 0px 20px;
-  
   box-sizing: border-box;
 }
-.home-logo{
+
+.home-logo {
   color: white;
   font-size: 48px;
-  position: relative;
-  top: 2px;
-  
-  /* right: 20%; */
   cursor: pointer;
 }

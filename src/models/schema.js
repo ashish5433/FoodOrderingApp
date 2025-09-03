@@ -41,5 +41,6 @@ const orderSchema=new Schema({
 },{timestamps:true})
 
 orderSchema.index({status:1,createdAt:-1});
+orderSchema.index({table_no:1},{unique:true});
 
 export default mongoose.models.Order || mongoose.model("Order",orderSchema);
