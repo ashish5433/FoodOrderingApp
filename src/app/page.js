@@ -8,8 +8,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
 import { ToastContainer, toast, Bounce } from 'react-toastify';
-import { Router } from 'next/router';
-import { Router } from 'next/router';
+
 const macondo = Macondo({
   subsets: ["latin"],
   weight: "400",
