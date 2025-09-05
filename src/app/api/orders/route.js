@@ -1,9 +1,17 @@
 
 import dbConnect from '@/lib/dbConnnect.js';
 import Order from '@/models/schema.js';
-
+import Pusher from 'pusher'
 export const runtime = "nodejs";
 
+
+const pusher = new Pusher({
+    appId: process.env.PUSHER_APP_ID,
+    key: process.env.PUSHER_KEY,
+    secret: process.env.PUSHER_SECRET,
+    cluster: process.env.PUSHER_CLUSTER,
+    useTLS: true,
+});
 export async function POST(req) {
   try {
     await dbConnect();
@@ -36,6 +44,17 @@ export async function POST(req) {
       }
     );
    
+    const orderDoc={
+      _id: raw._id.toString(),
+      table_no: raw.table_no,
+      item: raw.item,
+      total: raw.total,
+      status: raw.status,
+      createdAt: raw.createdAt?.toISOString() ?? new Date().toISOString(),
+    }
+
+    await pusher.trigger('food-orders','Order-Created',orderDoc)
+    
     return Response.json(
       { message: "Order created"},
       { status: 201 }

@@ -9,9 +9,7 @@ const Page = () => {
   const [orders, setOrders] = useState([])
   const [expanded, setExpanded] = useState({})
 
-  
-  useEffect(() => {
-    const fetchOrders = async () => {
+  const fetchOrders = async () => {
       const res = await axios.get("/api/orders")
       setOrders(res.data)
 
@@ -27,7 +25,7 @@ const Page = () => {
                       ...item,
                       item: item.item.map((it, idx) => ({
                         ...it,
-                        checked: data.checks[idx] ?? false, // ✅ default to false
+                        checked: data.checks[idx] ?? false, 
                       })),
                     }
                   : item
@@ -37,20 +35,47 @@ const Page = () => {
         })
       })
     }
-
+  useEffect(()=>{
     fetchOrders()
+  },[])
+  useEffect(() => {
+    let pusherClient;
+    let channel;
+    (async ()=>{
+      const Pusher=(await import("pusher-js")).default
+      pusherClient=new Pusher(
+        process.env.NEXT_PUBLIC_PUSHER_KEY, {
+        cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+      }
+      )
+      // console.log(pusherClient)
+      channel=pusherClient.subscribe('food-orders')
+      channel.bind('Order-Created',(data)=>{
+        console.log("New Data", data)
+        setOrders((prev)=>[data,...prev])
+      })
+    })()
+
+    return () => {
+      try {
+        if (channel) {
+          channel.unbind_all();
+          channel.unsubscribe();
+        }
+        if (pusherClient) pusherClient.disconnect();
+      } catch (e) {
+        console.log("Pusher Error ",e)
+      }
+    };
   }, [])
 
-  // 🔹 Expand/collapse card
   const toggleExpand = (id) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }))
   }
 
-  // 🔹 Handle checkbox toggle
   const handleCheck = async (orderId, idx) => {
     const order = orders.find((item) => item._id === orderId)
 
-    // Ensure no undefined values
     const updatedChecks = order.item.map((it, i) =>
       i === idx ? !(it.checked ?? false) : (it.checked ?? false)
     )
