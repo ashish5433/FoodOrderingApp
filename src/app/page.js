@@ -1,7 +1,5 @@
 "use client"
 import styles from './styles/home.module.css'
-
-
 import { use, useState } from 'react';
 import { Macondo } from 'next/font/google'
 import { useRouter } from 'next/navigation';
@@ -38,13 +36,23 @@ export default function Home() {
       const res = await axios.get(`/api/orders/${tableNum}`)
       const data = res.data
       if (data?.message !== null) {
-        // alert("Order Already Exists")
+        
         setshowPopUp(true)
         return;
       }
       router.push(`/table/${tableNum}`)
     } catch (err) {
-      alert("Error in Opening Table")
+       toast.error('Please try again...', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
       console.log(err)
     } finally {
       setLoading(false)
@@ -55,10 +63,30 @@ export default function Home() {
       setLoading(true);
       const res = axios.delete(`/api/orders/${tableNum}`)
       const data = (await res).data
-      console.log(data)
+       toast.info('Order Deleted...', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
+      
     } catch (err) {
-      alert("Error Occured in deleting")
-      console.log(err)
+       toast.error('Error in Deleting Order', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
       setLoading(false)
     } finally {
       setLoading(false)

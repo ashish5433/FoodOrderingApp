@@ -60,7 +60,7 @@ export default function ProfilePage({ params }) {
       }else{
         alert(res.status)
       }
-      // setqty({})
+      
     } catch (err) {
       console.log("Error in order placing", err);
       if(err.status===409){
@@ -77,7 +77,7 @@ export default function ProfilePage({ params }) {
         });
         return;
       }
-      alert("Order Not placed")
+      alert("Order Not placed ",err.status)
     } finally {
       setSaving(false)
     }
