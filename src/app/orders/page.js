@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import styles from "@/app/styles/order.module.css"
 import axios from "axios"
 import { db } from "@/lib/firebase"
@@ -7,66 +7,88 @@ import { doc, onSnapshot, setDoc } from "firebase/firestore"
 
 const Page = () => {
   const [orders, setOrders] = useState([])
+  
   const [expanded, setExpanded] = useState({})
+  const unsubscribers = useRef({})
+
+  const subscribeToCheckboxes = (orderId) => {
+    if (unsubscribers.current[orderId]) return 
+
+    const ref = doc(db, "checkboxes", orderId)
+    const unsubscribe = onSnapshot(ref, (snap) => {
+      if (!snap.exists()) return
+      const snapData = snap.data()
+      const checks = Array.isArray(snapData.checks) ? snapData.checks : []
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === orderId
+            ? {
+                ...o,
+                item: o.item.map((it, idx) => ({
+                  ...it,
+                  checked: checks[idx] ?? false,
+                })),
+              }
+            : o
+        )
+      )
+    })
+
+    unsubscribers.current[orderId] = unsubscribe
+  }
 
   const fetchOrders = async () => {
-      const res = await axios.get("/api/orders")
-      setOrders(res.data)
+    const res = await axios.get("/api/orders")
+    setOrders(res.data)
 
-      res.data.forEach((order) => {
-        const ref = doc(db, "checkboxes", order._id)
-        onSnapshot(ref, (snap) => {
-          if (snap.exists()) {
-            const data = snap.data()
-            setOrders((prev) =>
-              prev.map((item) =>
-                item._id === order._id
-                  ? {
-                      ...item,
-                      item: item.item.map((it, idx) => ({
-                        ...it,
-                        checked: data.checks[idx] ?? false, 
-                      })),
-                    }
-                  : item
-              )
-            )
-          }
-        })
-      })
-    }
-  useEffect(()=>{
-    fetchOrders()
-  },[])
+    res.data.forEach((order) => subscribeToCheckboxes(order._id))
+  }
+
   useEffect(() => {
-    let pusherClient;
-    let channel;
-    (async ()=>{
-      const Pusher=(await import("pusher-js")).default
-      pusherClient=new Pusher(
-        process.env.NEXT_PUBLIC_PUSHER_KEY, {
+    fetchOrders()
+    return () => {
+      Object.values(unsubscribers.current).forEach((fn) => {
+        if (typeof fn === "function") fn()
+      })
+      unsubscribers.current = {}
+    }
+  }, [])
+
+  useEffect(() => {
+    let pusherClient
+    let channel
+
+    ;(async () => {
+      const Pusher = (await import("pusher-js")).default
+      pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
         cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
-      }
-      )
-      // console.log(pusherClient)
-      channel=pusherClient.subscribe('food-orders')
-      channel.bind('Order-Created',(data)=>{
-        console.log("New Data", data)
-        setOrders((prev)=>[data,...prev])
+      })
+
+      channel = pusherClient.subscribe("food-orders")
+      channel.bind("Order-Created", (newOrder) => {
+        const orderWithChecked = {
+          ...newOrder,
+          item: newOrder.item.map((it) => ({ ...it, checked: it.checked ?? false })),
+        }
+
+        setOrders((prev) => [orderWithChecked, ...prev])
+
+        subscribeToCheckboxes(newOrder._id)
       })
     })()
 
     return () => {
       try {
         if (channel) {
-          channel.unbind_all();
-          channel.unsubscribe();
+          channel.unbind_all()
+          channel.unsubscribe()
         }
-        if (pusherClient) pusherClient.disconnect();
+        if (pusherClient) pusherClient.disconnect()
       } catch (e) {
-        console.log("Pusher Error ",e)
+        console.log("Pusher Error ", e)
       }
-    };
+    }
   }, [])
 
   const toggleExpand = (id) => {
@@ -75,14 +97,13 @@ const Page = () => {
 
   const handleCheck = async (orderId, idx) => {
     const order = orders.find((item) => item._id === orderId)
+    if (!order) return
 
     const updatedChecks = order.item.map((it, i) =>
       i === idx ? !(it.checked ?? false) : (it.checked ?? false)
     )
 
-    await setDoc(doc(db, "checkboxes", orderId), {
-      checks: updatedChecks,
-    })
+    await setDoc(doc(db, "checkboxes", orderId), { checks: updatedChecks })
   }
 
   return (
