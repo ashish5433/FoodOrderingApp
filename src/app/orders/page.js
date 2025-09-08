@@ -7,7 +7,7 @@ import { doc, onSnapshot, setDoc } from "firebase/firestore"
 
 const Page = () => {
   const [orders, setOrders] = useState([])
-  
+  const [loading,setLoading]=useState(false)
   const [expanded, setExpanded] = useState({})
   const unsubscribers = useRef({})
 
@@ -39,10 +39,18 @@ const Page = () => {
   }
 
   const fetchOrders = async () => {
+    try{
+      setLoading(true)
     const res = await axios.get("/api/orders")
     setOrders(res.data)
 
     res.data.forEach((order) => subscribeToCheckboxes(order._id))
+    }catch(err){
+      alert("Error in Loading Orders")
+    }
+    finally{
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -107,6 +115,12 @@ const Page = () => {
   }
 
   return (
+    <>
+    {loading && (
+        <div className={styles.loaderOverlay}>
+          <div className={styles.spinner}></div>
+        </div>
+      )}
     <div className={styles.container}>
       {orders.map((order) => {
         const allChecked = order.item.every((it) => it.checked ?? false)
@@ -146,6 +160,7 @@ const Page = () => {
         )
       })}
     </div>
+    </>
   )
 }
 

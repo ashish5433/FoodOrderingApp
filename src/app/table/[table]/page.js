@@ -3,6 +3,7 @@ import { use, useMemo, useState } from "react";
 import menuData from "@/Data/menu.json";
 import styles from "../../styles/tablePage.module.css";
 import axios from "axios";
+import { ToastContainer, toast, Bounce } from 'react-toastify';
 export default function ProfilePage({ params }) {
   const { table } = use(params);
   const [qty, setqty] = useState({});
@@ -45,7 +46,17 @@ export default function ProfilePage({ params }) {
       const res = await axios.post('/api/orders', payload)
       console.log(res.status)
       if(res.status===201){
-      alert("Hurrayyy Order Placed");
+      toast.success('Order Placed!!', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
       }else{
         alert(res.status)
       }
@@ -53,7 +64,17 @@ export default function ProfilePage({ params }) {
     } catch (err) {
       console.log("Error in order placing", err);
       if(err.status===409){
-        alert("Order Already Exists...", err.status);
+        toast.error('Order Already Exists', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
         return;
       }
       alert("Order Not placed")
@@ -62,6 +83,20 @@ export default function ProfilePage({ params }) {
     }
   }
   return (
+    <>
+    <ToastContainer
+            position="top-center"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+            transition={Bounce}
+          />
     <div className={styles.page}>
 
       <header className={styles.topbar}>
@@ -158,7 +193,11 @@ export default function ProfilePage({ params }) {
                 <button className={styles.clearBtn} onClick={() => setqty({})}>
                   Clear
                 </button>
-                <button className={styles.primaryBtn} onClick={placeOrder}>
+                <button 
+                className={styles.primaryBtn} 
+                onClick={placeOrder}
+                disabled={saving===true}
+                >
                  {saving===true?"Saving..." : "Place Order"}
                 </button>
               </div>
@@ -167,5 +206,6 @@ export default function ProfilePage({ params }) {
         </section>
       )}
     </div>
+    </>
   );
 }

@@ -93,7 +93,7 @@ export default function Home() {
          
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-white/10 to-black/40 backdrop-blur-lg"></div>
 
-        {/* Optional vignette (dark corners, focus center) */}
+       
         <div className="absolute inset-0 bg-black/30 rounded-2xl pointer-events-none shadow-[inset_0_0_200px_rgba(0,0,0,0.6)]"></div>
         <div className={styles.nav}>
           <input type="number"
